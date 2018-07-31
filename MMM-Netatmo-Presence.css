@@ -1,0 +1,146 @@
+/*
+ * CSS file for MMM-Netatmo-Presence module
+ * 
+ * 
+ * 
+ */
+
+.mainWrapper{
+
+}
+
+.updateinfo{
+/*xsmall light*/
+
+  font-size: 15px;
+  line-height: 20px;
+  
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 300;
+  
+  text-align: center;
+      
+}
+
+.liveWrapper{
+}
+
+.liveName{
+/*xsmall light*/
+
+  font-size: 15px;
+  line-height: 20px;
+  
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 300;
+  
+  text-align: center;
+  
+   
+}
+
+.timelineTitle{
+/*xsmall light*/
+
+  font-size: 15px;
+  line-height: 20px;
+  
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 300;
+  
+  text-align: center;
+  
+/*  transform: scale(2) ;*/
+    
+}
+
+
+.eventTable{
+  text-align: center;
+}
+
+.eventLogo{
+
+  text-align: center;
+  font-size: 15px;
+  line-height: 20px;
+  
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 300;
+    
+}
+
+
+.eventTime{
+
+/*xsmall light*/
+
+  font-size: 15px;
+  line-height: 20px;
+  
+  font-family: "Roboto Condensed", sans-serif;
+  font-weight: 300;
+  
+}
+
+.eventImage{
+  
+    width: 120px;
+  
+}
+
+.iconHuman{
+
+  color: #9B1E1E;
+    
+}
+
+.iconVehicle{
+
+  color: white;
+    
+}
+
+.iconAnimal{
+
+  color: white;
+
+    
+}
+.iconMovement{
+
+  color: green;
+    
+}
+
+
+.eventImageNetatmo{
+  
+    width: 120px;
+  
+}
+
+.lastEventAsFullImageOnTop{
+  
+    width: 420px;
+  
+}
+
+.liveImageAsFullImageOnTop{
+  
+    width: 420px;
+  
+}
+
+.line {
+  border-bottom: 1px solid #666;
+  line-height: 15px;
+  color: #999;
+}
+
+
+
+
+
+
+

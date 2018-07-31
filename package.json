@@ -1,0 +1,29 @@
+{
+  "name": "MMM-Netatmo-Presence",
+  "version": "0.0.1",
+  "description": "MMM-Netatmo-Presence module for Magic Mirror",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AgP42/MMM-Netatmo-Presence"
+  },
+  "keywords": [
+    "magic mirror",
+    "smart mirror",
+    "module", 
+    "Netatmo", 
+    "Netatmo-Presence", 
+    "Camera"
+  ],
+  "author": "AgP42",
+  "contributors": "https://github.com/AgP42/MMM-Netatmo-Presence/graphs/contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AgP42/MMM-Netatmo-Presence/issues"
+  },
+  "homepage": "https://github.com/AgP42/MMM-Netatmo-Presence",
+  "dependencies": {
+    "request": "latest",
+    "express": "latest",
+    "body-parser" : "latest"
+    }
+}
