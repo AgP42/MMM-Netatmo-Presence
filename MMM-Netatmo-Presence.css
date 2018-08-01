@@ -5,11 +5,11 @@
  * 
  */
 
-.mainWrapper{
+.mainWrapperNP{
 
 }
 
-.updateinfo{
+.updateinfoNP{
 /*xsmall light*/
 
   font-size: 15px;
@@ -22,10 +22,10 @@
       
 }
 
-.liveWrapper{
+.liveWrapperNP{
 }
 
-.liveName{
+.liveNameNP{
 /*xsmall light*/
 
   font-size: 15px;
@@ -39,7 +39,7 @@
    
 }
 
-.timelineTitle{
+.timelineTitleNP{
 /*xsmall light*/
 
   font-size: 15px;
@@ -55,11 +55,11 @@
 }
 
 
-.eventTable{
+.eventTableNP{
   text-align: center;
 }
 
-.eventLogo{
+.eventLogoNP{
 
   text-align: center;
   font-size: 15px;
@@ -71,7 +71,7 @@
 }
 
 
-.eventTime{
+.eventTimeNP{
 
 /*xsmall light*/
 
@@ -83,56 +83,56 @@
   
 }
 
-.eventImage{
+.eventImageNP{
   
     width: 120px;
   
 }
 
-.iconHuman{
+.iconHumanNP{
 
   color: #9B1E1E;
     
 }
 
-.iconVehicle{
+.iconVehicleNP{
 
   color: white;
     
 }
 
-.iconAnimal{
+.iconAnimalNP{
 
   color: white;
 
     
 }
-.iconMovement{
+.iconMovementNP{
 
   color: green;
     
 }
 
 
-.eventImageNetatmo{
+.eventImageNetatmoNP{
   
     width: 120px;
   
 }
 
-.lastEventAsFullImageOnTop{
+.lastEventAsFullImageOnTopNP{
   
     width: 420px;
   
 }
 
-.liveImageAsFullImageOnTop{
+.liveImageAsFullImageOnTopNP{
   
     width: 420px;
   
 }
 
-.line {
+.lineNP{
   border-bottom: 1px solid #666;
   line-height: 15px;
   color: #999;

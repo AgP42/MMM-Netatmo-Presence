@@ -8,20 +8,22 @@
  
 var NodeHelper = require('node_helper');
 var request = require('request');
-var access_token = null;
+
+
 
 module.exports = NodeHelper.create({
   start: function () {
     console.log(this.name + ' helper started ...');    
     
-    
+    this.access_token = null;
+	this.access_token_time = null;
+        
   },
   
 socketNotificationReceived: function(notification, payload) {
     
-  //  console.log("notification : " + notification + ", payload : " + payload);
-    
-    var self = this;
+       	 
+ 	 console.log(new Date() + notification + " asked, from : " + payload.instanceID);
   
      /*
      * Get the access_token
@@ -29,11 +31,16 @@ socketNotificationReceived: function(notification, payload) {
      * */
      
     if (notification === 'GET_ACCESS_TOKEN') {
-      
-	    this.config = payload;
-	    
-		console.log("notification : " + notification + ", username : " + self.config.username);
 		
+		var self = this;
+		self.config = payload;
+      	    
+		console.log(new Date() + "notification : " + notification + ", username : " + self.config.username);
+		
+	//	console.log(new Date() + " - Notre token datait de :" + self.access_token_time);
+		console.log(new Date() + " - Notre token avait :" + (new Date() - self.access_token_time)/1000 + "s");
+
+			
 		var https = require("https");
 		const querystring = require('querystring');
 
@@ -51,7 +58,7 @@ socketNotificationReceived: function(notification, payload) {
 			'password': self.config.password,
 			'client_id':self.config.client_id,
 			'client_secret': self.config.client_secret,
-			'scope': "read_presence access_presence"});
+			'scope': "read_presence access_presence read_camera access_camera"});
 
 		var callback = function(response) {
 			response.on('error', function(e) {
@@ -66,20 +73,23 @@ socketNotificationReceived: function(notification, payload) {
 			response.on('end', function () {
 				res = JSON.parse(res);
 				if (response.statusCode == '200') {
-					access_token = res.access_token;
+					self.access_token = res.access_token;
 					var refresh_token = res.refresh_token;
 					var scope = res.scope;
-					console.log("Your access_token is:", access_token);
+				//	console.log("Your access_token is:", this.access_token);
 				//	console.log("Your refresh_token is:", refresh_token);
 				//	console.log("Your scopes are:", scope);
+				
+					self.access_token_time = new Date(); 
+					console.log(self.access_token_time + " - Your access_token is:", self.access_token);
 					
 					//we got a new token, say it to main file to allow it to request the datas
-					self.sendSocketNotification('GET_ACCESS_TOKEN_RESPONSE', 'OK'); //send back the infos to MMM-Netatmo-Presence.js						
+					self.sendSocketNotification('GET_ACCESS_TOKEN_RESPONSE', {payloadReturn: "OK", instanceID: self.config.instanceID }); //send back the infos to MMM-Netatmo-Presence.js						
 
 				} else {
 					
 					console.log('status code:', response.statusCode, '\n', res);
-					self.sendSocketNotification('GET_ACCESS_TOKEN_RESPONSE', response.statusCode); //send back the infos to MMM-Netatmo-Presence.js						
+					self.sendSocketNotification('GET_ACCESS_TOKEN_RESPONSE', {payloadReturn: response.statusCode, instanceID: self.config.instanceID }); //send back the infos to MMM-Netatmo-Presence.js						
 					
 				}
 			});
@@ -88,14 +98,14 @@ socketNotificationReceived: function(notification, payload) {
 		var req = https.request(options, callback);
 		req.on('error', function(e) {
 			console.log('There is a problem with your request:', e.message);
-			self.sendSocketNotification('GET_ACCESS_TOKEN_RESPONSE', e.message); //send back the infos to MMM-Netatmo-Presence.js						
+			self.sendSocketNotification('GET_ACCESS_TOKEN_RESPONSE', {payloadReturn: e.message, instanceID: self.config.instanceID }); //send back the infos to MMM-Netatmo-Presence.js						
 
 		});
 
 		req.write(params);
 		req.end();
 
-    } 
+	}//end GET_ACCESS_TOKEN
     
     /*
      * Request GET_CAMERA_EVENTS. 
@@ -104,17 +114,18 @@ socketNotificationReceived: function(notification, payload) {
      * */
     if (notification === 'GET_CAMERA_EVENTS') {
 		
-	    this.config = payload;
+		var self = this;
+		self.config = payload;	    
 	    
-		console.log("notification : " + notification + ", access_token : " + access_token + " , eventRequestSize : " + self.config.eventRequestSize);
+		console.log(new Date() + "notification : " + notification + ", access_token : " + self.access_token + " , eventRequestSize : " + self.config.eventRequestSize);
 
 		var https = require("https");
 		const querystring = require('querystring');
 
 		var params = querystring.stringify({
-			'access_token': access_token,
+			'access_token': self.access_token,
 			'home_id': self.config.home_id,
-			'size': self.config.eventRequestSize, //nuber of events to retrieve. 
+			'size': self.config.eventRequestSize, //number of events to retrieve. 
 		});
 
 		var options = {
@@ -143,14 +154,16 @@ socketNotificationReceived: function(notification, payload) {
 					var data = res.body;
 					var homes =  data.homes;
 			//		console.log(homes)	
+			
+					console.log(new Date() + " - NEW DATAS, for : " + self.config.instanceID);
 
-					self.sendSocketNotification('GET_CAMERA_EVENTS_RESPONSE', homes); //send back the infos to MMM-Netatmo-Presence.js						
+					self.sendSocketNotification('GET_CAMERA_EVENTS_RESPONSE', {payloadReturn: homes, instanceID: self.config.instanceID }); //send back the infos to MMM-Netatmo-Presence.js						
 						
 					
 				} else if (response.statusCode == '403'){
 					
-					console.log('New token requested !');
-					self.sendSocketNotification('GET_CAMERA_EVENTS_RESPONSE', 'TOKEN_EXPIRED'); //send back the info to MMM-Netatmo-Presence.js						
+					console.log(new Date() + 'Error 403 - New token requested !');
+					self.sendSocketNotification('GET_CAMERA_EVENTS_RESPONSE', {payloadReturn: 'TOKEN_EXPIRED', instanceID: self.config.instanceID }); //send back the info to MMM-Netatmo-Presence.js						
 
 				} else {
 					console.log('status code:', response.statusCode, '\n', res);
@@ -166,34 +179,7 @@ socketNotificationReceived: function(notification, payload) {
 		req.write(params);
 		req.end();
 
-    } 
-    
-     /*
-     * Check if the previous vpn_url is still reachable
-     * NOT USED
-     * */
-    if (notification === 'PING_VPN_URL') {
-      
-      var that = this;
-      
- //     console.log("Payload pour PING_VPN_URL :" + payload);
-      
-      request({
-          url: payload,
-          method: 'GET'
-        }, function(error, response, body) {
-          if (!error && response.statusCode == 200) {
-            that.lastConnection = new Date(); //success, we record the new date
-          }
-          
-          //whatever the answer, we send the answer back to main file with status and lastConnection timestamp
-          that.sendSocketNotification('PING_VPN_URL_RESPONSE', {
-              status: !error && response.statusCode == 200?"OK":"ERROR",
-              lastConnection: that.lastConnection
-          });
-        }
-      );
-    } 
+    }
     
    
   }

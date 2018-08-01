@@ -18,6 +18,7 @@ Module.register("MMM-Netatmo-Presence",{
 				logDebug: false, //set to true to get detailed debug logs. To see them : "Ctrl+Shift+i"
 				
                 updateInterval: 5, //in min. Refrest interval
+                initialDelay: 0, //sec
                 displayLastUpdate: true, //to display the last update of the API datas or live snapshot image (on top of the module)
 				displayLastUpdateFormat: 'ddd - HH:mm:ss', //format of the date and time to display for displayLastUpdate and for events
            		animationSpeed: 1000, 	//display animation time between refresh, in ms.
@@ -31,10 +32,10 @@ Module.register("MMM-Netatmo-Presence",{
 				fade: true,		//fade effect at the end of the timeline ?
 				fadePoint: 0.25,
 				//icon definition
-				iconHuman: 'fa fa-user iconHuman',
-				iconVehicle: 'fa fa-car iconVehicle',
-				iconAnimal: 'fa fa-paw iconAnimal',
-				iconMovement: 'fa fa-envira iconMovement',
+				iconHuman: 'fa fa-user iconHumanNP',
+				iconVehicle: 'fa fa-car iconVehicleNP',
+				iconAnimal: 'fa fa-paw iconAnimalNP',
+				iconMovement: 'fa fa-envira iconMovementNP',
 				
 				//config for live snapshot
 				liveImageAsFullImageOnTop: true, //display the live snapshot or not
@@ -51,34 +52,47 @@ Module.register("MMM-Netatmo-Presence",{
 
 start: function () {
 	
-		Log.info("Starting module: " + this.name);
+		Log.info("Starting module: " + this.name + " with identifier: " + this.identifier);
+
+		this.loglog("start");
 
 		var self = this;
 		this.ModuleNetatmoPresenceHidden = false; //displayed by default
 		this.IntervalID = 0;
 		this.events = [];
 		this.cameraLiveURL = [];
+		this.config.instanceID = this.identifier;
 		
 		this.loaded = false;
 		this.errorMessage = "Loading...";
+		
+//		this.loglog("demande premier token - loaded false");
 	
 		//get a new token at start-up. When receive, GET_CAMERA_EVENTS will be requested
-		this.sendSocketNotification('GET_ACCESS_TOKEN', this.config);
+		this.updateTimer = setTimeout(function() {
+			self.sendSocketNotification('GET_CAMERA_EVENTS', self.config);
+		}, this.config.initialDelay *1000);
 
 		//set auto-update                               
 		this.IntervalID = setInterval( function () { 				
 			//request directly the data, with the previous token. When the token will become invalid (error 403), it will be requested again
 			self.sendSocketNotification('GET_CAMERA_EVENTS', self.config);
-		}, this.config.updateInterval * 60 * 1000);    
+		}, this.config.updateInterval * 60 * 1000 + this.config.initialDelay *1000);    
 
 }, //end start function
+
+loglog: function(notification) {
+		
+	if(this.config.logDebug){
+		Log.log(this.data.header + " - " + moment.unix(Date.now() / 1000).format('ddd - HH:mm:ss:SSS') + " - " + notification);
+	}
+		
+},
   
 suspend: function() { //function called when module is hiden
 	this.ModuleNetatmoPresenceHidden = true; 
-	
-	if(this.config.logDebug){
-		Log.log("Fct suspend - ModuleHidden = " + this.ModuleNetatmoPresenceHidden);
-	}
+
+		this.loglog("Fct suspend - ModuleHidden = " + this.ModuleNetatmoPresenceHidden);
 	
 	this.GestionUpdateIntervalNetatmoPresence(); //call the function that manage all cases
 },
@@ -86,9 +100,8 @@ suspend: function() { //function called when module is hiden
 resume: function() { //function called when module is displayed again
 	this.ModuleNetatmoPresenceHidden = false;
 	
-	if(this.config.logDebug){
-		Log.log("Fct resume - ModuleHidden = " + this.ModuleNetatmoPresenceHidden);
-	}
+		this.loglog("Fct resume - ModuleHidden = " + this.ModuleNetatmoPresenceHidden);
+
 	
 	this.GestionUpdateIntervalNetatmoPresence();	
 },
@@ -96,9 +109,7 @@ resume: function() { //function called when module is displayed again
 notificationReceived: function(notification, payload) {
 	if (notification === "USER_PRESENCE") { // notification sent by the module MMM-PIR-Sensor or others
 		
-		if(this.config.logDebug){
-			Log.log("Fct notificationReceived USER_PRESENCE - payload = " + payload);
-		}
+		this.loglog("Fct notificationReceived USER_PRESENCE - payload = " + payload);
 		
 		UserPresence = payload;
 		this.GestionUpdateIntervalNetatmoPresence();
@@ -110,9 +121,7 @@ GestionUpdateIntervalNetatmoPresence: function() {
 		
 		var self = this;
 
-		if(this.config.logDebug){
-			Log.log(this.name + ": user is present and module is displayed ! Update !");
-		}
+		this.loglog("user is present and module is displayed ! Update !");
     
 		// update now
 		self.sendSocketNotification('GET_CAMERA_EVENTS', self.config);
@@ -122,15 +131,13 @@ GestionUpdateIntervalNetatmoPresence: function() {
 			//set autoupdate                               
 			this.IntervalID = setInterval( function () { 				
 				self.sendSocketNotification('GET_CAMERA_EVENTS', self.config);
-			}, this.config.updateInterval * 60 * 1000); 
+			}, this.config.updateInterval * 60 * 1000 + this.config.initialDelay *1000);
 		}
 	
 	}else{ //user is not present OR module is not displayed : stop updating
 		
-		if(this.config.logDebug){
-			Log.log("Stop update ! ID : " + this.IntervalID);
-		}
-		
+		this.loglog("Stop update ! ID : " + this.IntervalID);
+	
 		clearInterval(this.IntervalID); // on arrete l'intervalle d'update en cours
 		this.IntervalID=0; //on reset la variable
 
@@ -140,25 +147,32 @@ GestionUpdateIntervalNetatmoPresence: function() {
 //communication socket with node_helper.js --> reception
 socketNotificationReceived: function(notification, payload) {
 
-  var self = this;
+	var self = this;
   	  
-	if(self.config.logDebug){
-	  Log.info('received notification : ' + notification + " payload : " + payload);
-	}
+    this.loglog("received notification : " + notification + " pour : " + payload.instanceID + " payload : " + payload.payloadReturn);
+		
+	//if this notificatoin is not for us --> go out of the loop !	
+	if (payload.instanceID !== this.identifier) {
+		this.loglog("Mauvaise instance, STOP ! Envoyé pour : " + payload.instanceID + " et nous on est !: " + this.identifier);
+		return;
+    }
+    
 	
   /*
    * GET_ACCESS_TOKEN_RESPONSE
    * */	
   if (notification === 'GET_ACCESS_TOKEN_RESPONSE') {
 	  
-	if(payload === 'OK'){//we got a token, we can request the data
+	if(payload.payloadReturn === 'OK'){//we got a token, we can request the data
 		
 		this.sendSocketNotification('GET_CAMERA_EVENTS', this.config);
 		
 	}else{
 		
+		this.loglog("GET_ACCESS_TOKEN_RESPONSE en erreur - loaded false : " + payload.payloadReturn);
+
 		self.loaded = false;
-		self.errorMessage = "ERROR : " + payload;
+		self.errorMessage = "ERROR : " + payload.payloadReturn;
 		self.updateDom(self.config.animationSpeed); //update the Dom to display the error message
 		
 	}
@@ -171,13 +185,16 @@ socketNotificationReceived: function(notification, payload) {
    * */	
   if (notification === 'GET_CAMERA_EVENTS_RESPONSE') {
 
-	if(payload === 'TOKEN_EXPIRED'){//token ended, let's request a new one
+
+	if(payload.payloadReturn === 'TOKEN_EXPIRED'){//token ended, let's request a new one
+		
+		this.loglog("TOKEN EXPIRED notification received, new one requested");		
 		
 		this.sendSocketNotification('GET_ACCESS_TOKEN', self.config);
 		
-	} else if (payload) { 
+	} else if (payload.payloadReturn) { 
 		
-		var homes = payload; 
+		var homes = payload.payloadReturn; 
 		self.cameraLiveURL = [];
 
 							
@@ -205,11 +222,14 @@ socketNotificationReceived: function(notification, payload) {
 				
 				//get all events (much more easier...)
 				self.events = i_homes.events;
+		//		Log.log("events recues :" + self.events);
 
 			}
 			
 		});
-		
+	
+		this.loglog("Loaded = true");		
+
 		self.loaded = true;
 		self.updateDom(self.config.animationSpeed); //update the Dom
 		
@@ -230,17 +250,35 @@ getDom: function() {
 	var self = this;
 	var eventNumber = 0;
 
-	if(self.config.logDebug){		
-		Log.log ("update iFrame DOM at : " + moment.unix(Date.now() / 1000).format(self.config.displayLastUpdateFormat));		
-	}
+	this.loglog("update iFrame DOM");	
+	
+		
 	
 	var wrapper = document.createElement("div");// main Wrapper that containts the others
-	wrapper.className = "mainWrapper"; //for CSS customization
+	wrapper.className = "mainWrapperNP"; //for CSS customization
 
-	//to be displayed at start-up during loading
+	//to be displayed at start-up during loading or after when an error occurs
 	if (!this.loaded) {
+		
 		wrapper.innerHTML = self.errorMessage;
 		wrapper.className = "dimmed light small";
+		
+		//to display last update once on top of the timeline
+		if(this.config.displayLastUpdate){
+			
+			this.lastUpdate = Date.now() / 1000 ; 
+		
+	/*		var line = document.createElement("div");
+			line.className = "lineNP";
+			wrapper.appendChild(line);*/
+
+			var updateinfo = document.createElement("div"); //le div qui donne la date, si configuré pour etre affichée
+			updateinfo.className = "updateinfoNP";
+			updateinfo.innerHTML = " Update : " + moment.unix(this.lastUpdate).format(this.config.displayLastUpdateFormat);
+			
+			wrapper.appendChild(updateinfo);
+		}
+		
 		return wrapper;
 	}
 	
@@ -250,11 +288,11 @@ getDom: function() {
 		this.lastUpdate = Date.now() / 1000 ; 
 	
 /*		var line = document.createElement("div");
-		line.className = "line";
+		line.className = "lineNP";
 		wrapper.appendChild(line);*/
 
 		var updateinfo = document.createElement("div"); //le div qui donne la date, si configuré pour etre affichée
-		updateinfo.className = "updateinfo";
+		updateinfo.className = "updateinfoNP";
 		updateinfo.innerHTML = " Update : " + moment.unix(this.lastUpdate).format(this.config.displayLastUpdateFormat);
 		
 		wrapper.appendChild(updateinfo);
@@ -267,17 +305,17 @@ getDom: function() {
 	if(self.config.liveImageAsFullImageOnTop){
 	
 		var liveWrapper = document.createElement("div");
-		liveWrapper.className = "liveWrapper"; 				
+		liveWrapper.className = "liveWrapperNP"; 				
 				
 		self.cameraLiveURL.forEach(function(i_cameraURL, index) {
 
 			var liveName = document.createElement("div"); 
-			liveName.className = "liveName";
+			liveName.className = "liveNameNP";
 			liveName.innerHTML = "Live " + self.config.liveCamera_Name[index];		
 			liveWrapper.appendChild(liveName);
 		
 			var liveImageAsFullImageOnTop = document.createElement("IMG"); 
-			liveImageAsFullImageOnTop.className = "liveImageAsFullImageOnTop";
+			liveImageAsFullImageOnTop.className = "liveImageAsFullImageOnTopNP";
 			liveImageAsFullImageOnTop.src = i_cameraURL;		
 			liveWrapper.appendChild(liveImageAsFullImageOnTop);
 			
@@ -285,7 +323,7 @@ getDom: function() {
 		
 		//display line to separate live and events
 		var line = document.createElement("div");
-		line.className = "line";
+		line.className = "lineNP";
 		liveWrapper.appendChild(line);		
 		wrapper.appendChild(liveWrapper);
 
@@ -303,7 +341,6 @@ getDom: function() {
 			var event_time = i_events.event_list[0].time;
 			var event_type = i_events.event_list[0].type;
 			var event_message = i_events.event_list[0].message;	
-			
 						
 		} else if (i_events.type === 'movement'){
 			
@@ -314,10 +351,7 @@ getDom: function() {
 			var event_message = i_events.message;	
 		}
 			
-		if(self.config.logDebug){		
-			Log.log("i_events.time : " + moment.unix(event_time).format(self.config.displayLastUpdateFormat) + "message : " + event_message); 
-		}		
-
+		self.loglog("i_events.time : " + moment.unix(event_time).format(self.config.displayLastUpdateFormat) + "message : " + event_message); 
 		
 		//search only the type of event requested by the config
 		self.config.eventsTypeToDisplay.forEach(function(i_eventsTypeToDisplay) { //i_XXX represent the value of the index and not the index itself !
@@ -329,7 +363,7 @@ getDom: function() {
 
 					if(eventNumber == 0){//title : only display it once
 						var timelineTitle = document.createElement("div");
-						timelineTitle.className = "timelineTitle";
+						timelineTitle.className = "timelineTitleNP";
 						timelineTitle.innerHTML = "Last events for " + self.config.eventsTypeToDisplay ;
 						wrapper.appendChild(timelineTitle);
 					}
@@ -337,7 +371,7 @@ getDom: function() {
 					if(self.config.lastEventAsFullImageOnTop && eventNumber == 0){
 
 						var lastEventAsFullImageOnTop = document.createElement("IMG"); //le div qui donne la date, si configuré pour etre affichée
-						lastEventAsFullImageOnTop.className = "lastEventAsFullImageOnTop";
+						lastEventAsFullImageOnTop.className = "lastEventAsFullImageOnTopNP";
 						lastEventAsFullImageOnTop.src = snapshot_url;
 						
 						wrapper.appendChild(lastEventAsFullImageOnTop);
@@ -347,16 +381,16 @@ getDom: function() {
 					/**structure of the event to display, can be changed by another design !**/
 															
 					var eventWrapper = document.createElement("table");
-					eventWrapper.className="eventTable";
+					eventWrapper.className="eventTableNP";
 
 					var tr1 = document.createElement("tr");//first line
 					  
 						var eventLogo = document.createElement("td");//first cell, to display logo
-						eventLogo.className = "eventLogo"; //for CSS customization
+						eventLogo.className = "eventLogoNP"; //for CSS customization
 						tr1.appendChild(eventLogo);
 						var eventImage = document.createElement("td");//second cell, with 2 row size, to display the image
 						eventImage.rowSpan=2;
-						eventImage.className = "eventImage"; //for CSS customization
+						eventImage.className = "eventImageNP"; //for CSS customization
 						tr1.appendChild(eventImage);
 					 
 					eventWrapper.appendChild(tr1);
@@ -364,7 +398,7 @@ getDom: function() {
 						var tr2 = document.createElement("tr");//second line
 					  
 						var eventTime = document.createElement("td");
-						eventTime.className = "eventTime"; //for CSS customization
+						eventTime.className = "eventTimeNP"; //for CSS customization
 						tr2.appendChild(eventTime);
 						
 					eventWrapper.appendChild(tr2);
@@ -373,7 +407,7 @@ getDom: function() {
 
 						//add a line
 			/*			var line = document.createElement("div");
-						line.className = "line";
+						line.className = "lineNP;
 						eventWrapper.appendChild(line);*/
 						
 			//		}
@@ -409,7 +443,7 @@ getDom: function() {
 
 					//image  (this image itself is included into the td "eventImage")
 					var eventImageNetatmo = document.createElement("IMG");
-					eventImageNetatmo.className = 'eventImageNetatmo'
+					eventImageNetatmo.className = 'eventImageNetatmoNP'
 					eventImageNetatmo.src = vignette_url;
 					eventImage.appendChild(eventImageNetatmo);				
 		
@@ -430,7 +464,7 @@ getDom: function() {
 				
 					eventNumber++;
 					
-				//	Log.log("event number : "+ eventNumber);
+		//		self.loglog("event number : "+ eventNumber);
 				
 				}else{
 					//we reach the requested number of event to display, stop adding new event (but the loop will continu anyway...)
