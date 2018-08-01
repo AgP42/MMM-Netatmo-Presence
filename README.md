@@ -1,6 +1,6 @@
 # MMM-Netatmo-Presence
 
-The `MMM-Netatmo-Presence` is a module for MagicMirror². It allow to display the live images and historical events of Netatmo-Presence cameras to your [MagicMirror](https://github.com/MichMich/MagicMirror). 
+The `MMM-Netatmo-Presence` is a module for MagicMirror². It allow to display the live images and historical events of Netatmo-Presence cameras to your [MagicMirror](https://github.com/MichMich/MagicMirror). Live image display should also work for Welcome cameras.
 
 ## Main functionalities : 
 - Display Live snapshot of one or several cameras - This behavior should work also for "Netatmo Welcome" cameras, but not tested
@@ -72,33 +72,36 @@ modules: [
 		position: 'bottom_left',
 		config:{
 						
-			updateInterval: 5, //in min. Refrest interval
-			displayLastUpdate: true, //to display the last update of the API datas or live snapshot image (on top of the module)
+			updateInterval: 5, //in min.
+			displayLastUpdate: true, //to display the time of the last update of the module
 			displayLastUpdateFormat: 'ddd - HH:mm:ss', //format of the date and time to display for displayLastUpdate and for events
-			animationSpeed: 1000, 	//display animation time between refresh, in ms.
+			animationSpeed: 1000, 	//display animation time during refresh, in ms.
 			
 			//config for timeline display of the events
-			eventsTypeMessageDisplay: false, //if false : will display icons for the type of events, if true : will display the text message given by Netatmo (directly on the good language normally)
-			eventsNumberToDisplay: 5,	//set to 1 for only the last one and set to 0 for none...	
+			eventsTypeMessageDisplay: false, //if false : will display icons, if true : will display text message
+			eventsNumberToDisplay: 5,	//how many events to display for the timeline. Set to 0 to display only live images	
 			eventsTypeToDisplay: ["human", "vehicle"], //possible values : "animal", "vehicle", "human" or "movement"
-			eventRequestSize: 0, //will request this value of events to the API. Increase this value if the number of "eventsNumberToDisplay" is often not reach. Decrease it to limit bandwith and MagicMirror load. 
+			eventRequestSize: 30, //will request this value of events to the API. Increase this value if the number of "eventsNumberToDisplay" is often not reach. Decrease it to limit network bandwith and MagicMirror load. 
 			lastEventAsFullImageOnTop: true,	//to display the last event not only as a small image focus on Netatmo detection but also the full image. If several cameras, only the one of the last event will be displayed				
 			fade: true,		//fade effect at the end of the timeline ?
 			fadePoint: 0.25,
 			//icon definition
-			iconHuman: 'fa fa-user iconHuman',
-			iconVehicle: 'fa fa-car iconVehicle',
-			iconAnimal: 'fa fa-paw iconAnimal',
-			iconMovement: 'fa fa-envira iconMovement',
+			iconHuman: 'fa fa-user iconHumanNP',
+			iconVehicle: 'fa fa-car iconVehicleNP',
+			iconAnimal: 'fa fa-paw iconAnimalNP',
+			iconMovement: 'fa fa-envira iconMovementNP',
+			//see CSS file for the size of the event images
 			
 			//config for live snapshot
 			liveImageAsFullImageOnTop: true, //display the live snapshot or not
 			liveCamera_Name: ["Nord", "Sud"], //name of the cameras to be displayed (has to be the same than configured on your netatmo app). The images will be display on the same order than written here
+			//see CSS file for the size of the live snapshot images
 								
+			//see README.md for details how to get thoses infos						
 			client_id: 'your add id', 
 			client_secret: 'your app secret', 
 			username: 'your Netatmo username (e-mail)',
-			password: 'your Netatmo password',
+			password: 'your Netatmo password', //communication is https !
 			home_id: 'your home id', //necessaire pour l'API
 
 		}
@@ -111,7 +114,7 @@ modules: [
 The following properties can be configured:
 
 
-<table width="100%">
+<table>
 		<tr>
 			<th>Option</th>
 			<th width="100%">Description</th>
@@ -136,8 +139,7 @@ The following properties can be configured:
 				<br><b>Possible values:</b> See [Moment.js formats](http://momentjs.com/docs/#/parsing/string-format/)
 				<br><b>Default value:</b> <code>'ddd - HH:mm:ss'</code>
 			</td>
-		</tr>
-				
+		</tr>			
 		<tr>
 			<td><code>animationSpeed</code></td>
 			<td>Animation time for the refresh, in ms<br>
@@ -146,79 +148,81 @@ The following properties can be configured:
 		</tr>
 		<tr>
 			<td><code>eventsTypeMessageDisplay</code></td>
-			<td>if false : will display icons for the type of events, if true : will display the text message given by Netatmo (directly on the good language normally)<br>
+			<td>To choose between displaying icon or text. If false : will display icons, if true : will display the text message given by Netatmo (directly on the good language normally)<br>
 				<br><b>Default value:</b> <code>false</code>
 			</td>
 		</tr>		
 		<tr>
 			<td><code>eventsNumberToDisplay</code></td>
-			<td><br>
-				<br><b>Default value:</b> <code>false</code>
+			<td>How many events to display on the timeline ?<br>
+				<br><b>Default value:</b> <code>5</code>
 			</td>
 		</tr>		
 		<tr>
 			<td><code>eventsTypeToDisplay</code></td>
-			<td><br>
-			<br><b>Possible values:</b>"animal", "vehicle", "human" or "movement"<br>
-				<br><b>Default value:</b> <code>false</code>
+			<td>Allow to filter the type of event to display.<br>
+			<br><b>Possible values:</b>["animal", "vehicle", "human" or "movement"]<br>
+				<br><b>Default value:</b> <code>["human", "vehicle"]</code>
 			</td>
-		</tr>
-		
+		</tr>		
 		<tr>
 			<td><code>eventRequestSize</code></td>
-			<td>will request this value of events to the API. Increase this value if the number of "eventsNumberToDisplay" is often not reach. Decrease it to limit bandwith and MagicMirror load.<br>
-				<br><b>Default value:</b> <code>false</code>
+			<td>The number of events to request to the API. Increase this value if the number of "eventsNumberToDisplay" is often not reach. Decrease it to limit bandwith and MagicMirror load.<br>
+				<br><b>Default value:</b> <code>30</code>
 			</td>
 		</tr>		
 		<tr>
 			<td><code>lastEventAsFullImageOnTop</code></td>
-			<td>to display the last event not only as a small image focus on Netatmo detection but also the full image. If several cameras, only the one of the last event will be displayed<br>
-				<br><b>Default value:</b> <code>false</code>
+			<td>To display the last event not only as a small image focus on Netatmo detection but also the full image of the camera. If several cameras, only the one of the last event will be displayed. See screenshots<br>
+				<br><b>Default value:</b> <code>true</code>
 			</td>
 		</tr>		
 		<tr>
 			<td><code>fade</code></td>
-			<td>fade effect at the end of the timeline ?<br>
-				<br><b>Default value:</b> <code>false</code>
+			<td>Fade effect at the end of the timeline ? See screenshoot<br>
+				<br><b>Default value:</b> <code>true</code>
 			</td>
 		</tr>
 		<tr>
 			<td><code>fadePoint</code></td>
-			<td><br>
+			<td>Where to start the fade effect<br>
 				<br><b>Default value:</b> <code>0.25</code>
 			</td>
 		</tr>		
 		<tr>
 			<td><code>iconXXX</code></td>
-			<td>Definition of the icon to use and the associated CSS class used
+			<td>Definition of the icon to display for each event type and the associated CSS class used
 			iconHuman: 'fa fa-user iconHuman',
 			iconVehicle: 'fa fa-car iconVehicle',
 			iconAnimal: 'fa fa-paw iconAnimal',
-			iconMovement: 'fa fa-envira iconMovement',<br>
-				<br><b>Default value:</b> <code>false</code>
+			iconMovement: 'fa fa-envira iconMovement',
+				<br><b>Only when eventsTypeMessageDisplay=true</b>
 			</td>
 		</tr>		
 		<tr>
 			<td><code>liveImageAsFullImageOnTop</code></td>
-			<td>display the live snapshot or not<br>
-				<br><b>Default value:</b> <code>false</code>
+			<td>Display the live snapshot or not<br>
+				<br><b>Default value:</b> <code>true</code>
 			</td>
 		</tr>
 		<tr>
 			<td><code>liveCamera_Name</code></td>
-			<td>name of the cameras to be displayed (has to be the same than configured on your netatmo app). The images will be display on the same order than written here<br>
-				<br><b>Default value:</b> <code>false</code>
+			<td>Name of the cameras to be displayed (has to be the same than configured on your netatmo app). The images will be display on the same order than written here<br>
+				<br><b>Default value:</b> <code>["Camera1", "Camera2"]</code>
 			</td>
-		</tr>		
-		
+		</tr>			
 		<tr>
 			<td><code>API Connection params</code></td>
-			<td>See chapter bellow<br>
+			<td>See chapter dedicated bellow<br>
 				<br><b>Default value:</b> <code>false</code>
 			</td>
 		</tr>		
 
 </table>
+
+## Get API Connection params
+
+
 
 ## CSS use
 
