@@ -3,26 +3,48 @@
 The `MMM-Netatmo-Presence` is a module for MagicMirror². It allow to display the live images and historical events of Netatmo-Presence cameras to your [MagicMirror](https://github.com/MichMich/MagicMirror). 
 
 ## Main functionalities : 
-- Display Live snapshot of one or several cameras
-- Display the events recorded by all the cameras as timeline, with the type of event (animal, human, vehicle or movement). It is possible to filter which type to display and to choose the number of events to be displayed
-- Use the official sample code from Netatmo to connect to the API, so with https and no complex token to catch
+- Display Live snapshot of one or several cameras - This behavior should work also for "Netatmo Welcome" cameras, but not tested
+- Display the events recorded by all the cameras as timeline, with the type of event (animal, human, vehicle or movement). It is possible to filter the event type and to choose the number of events to be displayed
+- Use the official sample code from Netatmo to connect to the API, so with https and no complex token to catch !
 - Several instances possible (one to display live snapshot, another to display events of type "vehicle", another with all last 5 events, ...)
 - Network data and RPI load friendly :
-	- The API token is requested only when expired
+	- The API token is requested only when expired or once at start-up (also for several instances)
 	- If a PIR-sensor using MMM-PIR-Sensor module is used, the auto-update will stop during screen off (this behavior works also with all other module that send the notification "USER_PRESENCE").
-	- If all instances of MMM-Netatmo-Presence module are hidden (by REMOTE-CONTROL or any Carousel module for example), the auto-update will stop. 
-As soon as one MMM-Netatmo-Presence module will be again displayed on the screen or screen switch on, an update will be requested.
+	- If all instances of MMM-Netatmo-Presence module are hidden (by REMOTE-CONTROL or any Carousel module for example), the auto-update will also stop. 
+As soon as a MMM-Netatmo-Presence module will be again displayed on the screen or screen switch on, an update will be requested.
 - Possibility to display the date and time of the last update request (configurable)
-- CSS file and many configuration possible
+- CSS file and many display configuration possibilities
 
 To do for next version : 
-- Add a way to get an automatic refresh trigger by the camera itself when an event occurs. Probably by using MMM-IFTTT module, let's see !
-- Other idea ? Please post here (GitHub) or here (MM Forum)
+- Translation text file (only english now)
+- Find a way to get an automatic refresh triggered by the camera itself when an event occurs. Probably by using MMM-IFTTT module ?, let's see ! (First tests not very positiv...)
+- Other idea ? Please post here [Github Issues](https://github.com/AgP42/MMM-Netatmo-Presence/issues)
 
 ## Screenshot : 
 
-Displaying YouTube (displayLastUpdate: true) : 
-![MMM-iFrame-Ping](https://github.com/AgP42/xxx.png)
+All possible infos on 1 instance (Display last update of the module, 2 lives cameras, 5 lasts events of type human, vehicle or movement with the last event displayed as full image (= not only the focus on the trigger), and fade effet) : 
+
+![MMM-Netatmo-Presence](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/All%20in%201.png)
+
+3 differents instances (2* 1 lives cameras, and 1 with 5 lasts events of type animal with the last event displayed as full image (= not only the focus on the trigger), and fade effet) : 
+
+![MMM-Netatmo-Presence](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/3%20instances.png)
+
+2 lives cameras on 1 instance with last update display : 
+
+![MMM-Netatmo-Presence](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/2%20lives%20in%201%20instance.png)
+
+1 instances of 5 lasts events of type human or movement with the last event displayed as full image, no fade effet, colored icons (CSS configurable) : 
+
+![MMM-Netatmo-Presence](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/Events%20color%20icon.png)
+
+1 instances of 5 lasts events with text instead of icons (Text directly from Netatmo API, so in your language) :
+
+![MMM-Netatmo-Presence](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/timeline%20without%20update%20date%20and%20without%20icon%20-%20with%20last%20event%20big.png)
+
+1 instances of 5 lasts events with text, without last event as full image : 
+
+![MMM-Netatmo-Presence](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/timeline%20without%20update%20date%20and%20without%20icon%20-%20without%20last%20event%20big.png)
 
 ## Installation
 
