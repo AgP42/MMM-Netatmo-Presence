@@ -23,7 +23,7 @@ module.exports = NodeHelper.create({
 socketNotificationReceived: function(notification, payload) {
     
        	 
- 	 console.log(new Date() + notification + " asked, from : " + payload.instanceID);
+// 	 console.log(new Date() + notification + " asked, from : " + payload.instanceID);
   
      /*
      * Get the access_token
@@ -35,10 +35,10 @@ socketNotificationReceived: function(notification, payload) {
 		var self = this;
 		self.config = payload;
       	    
-		console.log(new Date() + "notification : " + notification + ", username : " + self.config.username);
+	//	console.log(new Date() + "notification : " + notification + ", username : " + self.config.username);
 		
 	//	console.log(new Date() + " - Notre token datait de :" + self.access_token_time);
-		console.log(new Date() + " - Notre token avait :" + (new Date() - self.access_token_time)/1000 + "s");
+	//	console.log(new Date() + " - Notre token avait :" + (new Date() - self.access_token_time)/1000 + "s");
 
 			
 		var https = require("https");
@@ -81,7 +81,7 @@ socketNotificationReceived: function(notification, payload) {
 				//	console.log("Your scopes are:", scope);
 				
 					self.access_token_time = new Date(); 
-					console.log(self.access_token_time + " - Your access_token is:", self.access_token);
+			//		console.log(self.access_token_time + " - Your access_token is:", self.access_token);
 					
 					//we got a new token, say it to main file to allow it to request the datas
 					self.sendSocketNotification('GET_ACCESS_TOKEN_RESPONSE', {payloadReturn: "OK", instanceID: self.config.instanceID }); //send back the infos to MMM-Netatmo-Presence.js						
@@ -117,7 +117,7 @@ socketNotificationReceived: function(notification, payload) {
 		var self = this;
 		self.config = payload;	    
 	    
-		console.log(new Date() + "notification : " + notification + ", access_token : " + self.access_token + " , eventRequestSize : " + self.config.eventRequestSize);
+	//	console.log(new Date() + "notification : " + notification + ", access_token : " + self.access_token + " , eventRequestSize : " + self.config.eventRequestSize);
 
 		var https = require("https");
 		const querystring = require('querystring');
@@ -155,7 +155,7 @@ socketNotificationReceived: function(notification, payload) {
 					var homes =  data.homes;
 			//		console.log(homes)	
 			
-					console.log(new Date() + " - NEW DATAS, for : " + self.config.instanceID);
+			//		console.log(new Date() + " - NEW DATAS, for : " + self.config.instanceID);
 
 					self.sendSocketNotification('GET_CAMERA_EVENTS_RESPONSE', {payloadReturn: homes, instanceID: self.config.instanceID }); //send back the infos to MMM-Netatmo-Presence.js						
 						
