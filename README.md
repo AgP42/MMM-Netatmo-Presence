@@ -1,10 +1,10 @@
 # MMM-Netatmo-Presence
 
-The `MMM-Netatmo-Presence` is a module for MagicMirror². It allow to display the live images and historical events of Netatmo-Presence cameras to your [MagicMirror](https://github.com/MichMich/MagicMirror). Live image display should also work for Welcome cameras.
+The `MMM-Netatmo-Presence` is a module for MagicMirror². It allow to display the live images and historical events of Netatmo-Presence cameras to your [MagicMirror](https://github.com/MichMich/MagicMirror). Live image display should also work for Welcome cameras (not tested).
 
 ## Main functionalities : 
 - Display Live snapshot of one or several cameras - This behavior should work also for "Netatmo Welcome" cameras, but not tested
-- Display the events recorded by all the cameras as timeline, with the type of event (animal, human, vehicle or movement). It is possible to filter the event type and to choose the number of events to be displayed
+- Display the events recorded by all the cameras as timeline, with the type of event (animal, human, vehicle or movement). It is possible to filter the event type and to choose the number of events to be displayed. This will not work for Welcome cameras.
 - Use the official sample code from Netatmo to connect to the API, so with https and no complex token to catch !
 - Several instances possible (one to display live snapshot, another to display events of type "vehicle", another with all last 5 events, ...)
 - Network data and RPI load friendly :
@@ -73,6 +73,7 @@ modules: [
 		config:{
 						
 			updateInterval: 5, //in min.
+			initialDelay: 0, //in sec. If several instances, set the first one at 0, then add a delay for each others. For example 3 sec for the second instance and then +1 for each next one. This is needed to avoid interferences of datas between each...
 			displayLastUpdate: true, //to display the time of the last update of the module
 			displayLastUpdateFormat: 'ddd - HH:mm:ss', //format of the date and time to display for displayLastUpdate and for events
 			animationSpeed: 1000, 	//display animation time during refresh, in ms.
@@ -113,19 +114,25 @@ modules: [
 
 The following properties can be configured:
 
-
 <table>
 		<tr>
 			<th>Option</th>
 			<th width="100%">Description</th>
-		</tr>	
+		</tr>		
 		<tr>
 			<td><code>updateInterval</code></td>
 			<td>Update internal for the module, in minutes. For Live snapshot, it will request a new image, for timeline it will request the Netatmo API if new events occurs and display them.<br>
 				<br><b>Example for 30 seconds:</b><code>0.5</code>
 				<br><b>Default value:</b> <code>5</code>
 			</td>
-		</tr>	
+		</tr>
+		<tr>
+			<td><code>initialDelay</code></td>
+			<td>In seconds. If you use several instances of this module, set the first one at 0, then add a delay for each others. For example 3 sec for the second instance and then +1 for each next one. This is needed to avoid interferences of datas between each instance. The value has also to be adapted according to your internet connection quality...<br>
+				<br><b>Example for 3 seconds:</b><code>3</code>
+				<br><b>Default value:</b> <code>0</code>
+			</td>
+		</tr>
 		<tr>
 			<td><code>displayLastUpdate</code></td>
 			<td>If true this will display the last update time at the top of the module. See screenshot<br>
@@ -250,7 +257,17 @@ The transmission of thoses infos by the module are made by HTTPS using the sampl
 ![home_id](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/API%20-%20home_id.png)
 
 ## CSS use
+.mainWrapperNP : main display that contains everything else
 
+.updateinfoNP : display the update date and time on top of the module, if <code>displayLastUpdate: true,</code>
+
+Structure of Live display :
+
+![CSS Live](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/CSS_LiveWrapperNP.png)
+
+Structure of Events display :
+
+![CSS Events](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/CSS_event%20NP.png)
 
 
 The MIT License (MIT)
