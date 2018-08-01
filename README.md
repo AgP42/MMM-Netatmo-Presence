@@ -222,7 +222,32 @@ The following properties can be configured:
 
 ## Get API Connection params
 
+### username and password
+They are your e-mail and password to log on Netatmo app or account. 
+The transmission of thoses infos by the module are made by HTTPS using the sample code given by Netatmo. 
 
+### client_id and client_secret
+1. Go to https://dev.netatmo.com/dev/createapp
+2. Log to your account (using username and password)
+3. Clic on "CREATE YOUR APP"
+4. Fullfill the following field :
+	- Name : any name you like "MagicMirror" for example
+	- Description : any description you like
+	- App Website, Company, Company website : not requested
+	- Data Protection Officer name and email : give yours
+	- Accept Netatmo APIs Terms and Conditions
+5. SAVE
+--> You get your client_id and client_secret !
+![client_id and client_secret](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/API.png)
+
+### home_id
+1. Go to https://dev.netatmo.com/en-US/resources/technical/reference/security/gethomedata
+2. Log to your account
+3. Clic on "Try this method by yourself with our TRY IT module"
+4. Clic on "TRY IT"
+5. Open the fields boby, homes and [object Object] 
+6. Get the first field "id" (in red) : 
+![home_id](https://github.com/AgP42/MMM-Netatmo-Presence/blob/master/screenshot/API%20-%20home_id.png)
 
 ## CSS use
 
